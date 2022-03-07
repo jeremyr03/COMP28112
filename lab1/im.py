@@ -10,6 +10,7 @@ functions of IMServer.php. That is: SET, GET and UNSET.
 import urllib.request, urllib.error, urllib.parse
 from urllib.parse import quote as enc
 
+
 class IMServerProxy:
 
   def __init__(self, url):
@@ -29,3 +30,4 @@ class IMServerProxy:
 
   def keys(self):
     return urllib.request.urlopen('%s?action=keys'%(self.url)).read().splitlines()
+
