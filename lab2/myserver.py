@@ -16,6 +16,10 @@ class colours:
 
 class MyServer(Server):
 
+    def __init__(self):
+        super(MyServer, self).__init__()
+        self.userCount = 0
+
     def onStart(self):
         print("Server has started")
 
@@ -23,7 +27,8 @@ class MyServer(Server):
         print("server ended")
 
     def onConnect(self, socket):
-        print("user connected")
+        self.userCount += 1
+        print(f"user connected, Current number of users: {self.userCount}")
 
     def onMessage(self, socket, message):
         print(f"message received: {colours.BLUE}{message}{colours.NORMAL}")
@@ -32,7 +37,8 @@ class MyServer(Server):
         return True
 
     def onDisconnect(self, socket):
-        print("\ndisconnecting users...")
+        self.userCount -= 1
+        print(f"disconnecting user. Current number of users: {self.userCount}")
 
 
 # Parse the IP address and port you wish to listen on.
