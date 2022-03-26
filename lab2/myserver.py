@@ -31,7 +31,11 @@ class MyServer(Server):
         print(f"user connected, Current number of users: {self.userCount}")
 
     def onMessage(self, socket, message):
-        print(f"message received: {colours.BLUE}{message}{colours.NORMAL}")
+        (command, sep, parameter) = message.strip().partition(' ')
+        print(f"command: {colours.GREEN}{command}{colours.NORMAL}")
+        print(f"Message: {colours.BLUE}{parameter}{colours.NORMAL}")
+
+        # print(f"message received: {colours.BLUE}{message}{colours.NORMAL}")
         message = message.upper().encode()
         socket.send(message)
         return True
