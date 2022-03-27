@@ -18,7 +18,8 @@ class MyServer(Server):
 
     def __init__(self):
         super(MyServer, self).__init__()
-        self.userCount = 0
+        self.users = {}
+        self.userCount = len(self.users)
 
     def onStart(self):
         print("Server has started")
@@ -30,17 +31,87 @@ class MyServer(Server):
         self.userCount += 1
         print(f"user connected, Current number of users: {self.userCount}")
 
+    def signedIn(self):
+        return
+
     def onMessage(self, socket, message):
         (command, sep, parameter) = message.strip().partition(' ')
         print(f"command: {colours.GREEN}{command}{colours.NORMAL}")
         print(f"Message: {colours.BLUE}{parameter}{colours.NORMAL}")
 
-        # print(f"message received: {colours.BLUE}{message}{colours.NORMAL}")
-        message = message.upper().encode()
-        socket.send(message)
+        if parameter == '':
+            toSend = "Invalid command. Try again and ensure it is in the format".encode() + \
+                     f" {colours.WARNING}<COMMAND> <PARAMETER[S]>{colours.NORMAL} ".encode() + \
+                     f"{colours.BOLD} separated by spaces{colours.NORMAL}".encode()
+            socket.send(toSend)
+
+        elif command.upper() == "SET_NAME":
+            if parameter.count(' ') > 0:
+                toSend = f"{colours.WARNING}Spaces are not allowed in username{colours.NORMAL}".encode()
+                socket.send(toSend)
+            elif self.users.get(parameter) is not None:
+                if self.users.get(parameter) == socket:
+                    toSend = f"{colours.WARNING}Username already set to {parameter}{colours.NORMAL}".encode()
+                    socket.send(toSend)
+                else:
+                    toSend = f"{colours.WARNING}user already exists{colours.NORMAL}".encode()
+                    socket.send(toSend)
+            else:
+                if socket in list(self.users.values()):
+                    oldUsername = list(self.users.keys())[list(self.users.values()).index(socket)]
+                    self.users.pop(oldUsername)
+                    toSend = f"{colours.HEADER}username changed to: {colours.BLUE}{parameter}{colours.NORMAL}"
+                else:
+                    toSend = f"{colours.HEADER}username set: {colours.BLUE}{parameter}{colours.NORMAL}"
+                print(toSend)
+                self.users[parameter] = socket
+                socket.send(toSend.encode())
+
+        elif command.upper() == "MESSAGE":
+            if socket in self.users.values():
+                if self.userCount != 1:
+                    for key, val in self.users.items():
+                        if val != socket:
+                            toSend = f"Message from " \
+                                     f"{colours.BLUE}{list(self.users.keys())[list(self.users.values()).index(socket)]}" \
+                                     f"{colours.NORMAL}: {colours.GREEN}{parameter}{colours.NORMAL}"
+                            val.send(toSend.encode())
+                else:
+                    toSend = f"{colours.WARNING}There are no other users to send your message to.{colours.NORMAL}"
+                    socket.send(toSend.encode())
+            else:
+                toSend = f"{colours.WARNING}Assign yourself a username to be able to send a message.{colours.NORMAL}"
+                socket.send(toSend.encode())
+
+        elif command.upper() == "DM":
+            if socket in self.users.values():
+                (DM, sep, msg) = parameter.strip().partition(' ')
+
+                if DM in self.users.keys():
+                    receiver = self.users[DM]
+                    toSend = f"Message from " \
+                             f"{colours.BLUE}{list(self.users.keys())[list(self.users.values()).index(socket)]}" \
+                             f"{colours.NORMAL}: {colours.GREEN}{parameter}{colours.NORMAL}"
+                    receiver.send(toSend.encode())
+                else:
+                    toSend = f"{colours.WARNING}User could not be found.{colours.NORMAL}"
+                    socket.send(toSend.encode())
+            else:
+                toSend = f"{colours.WARNING}Assign yourself a username to be able to send a message.{colours.NORMAL}"
+                socket.send(toSend.encode())
+
+        else:
+            print("Unkown command")
+            toSend = "Invalid command. Try again and ensure it is in the format".encode() + \
+                     f" {colours.WARNING}<COMMAND> <PARAMETER[S]>{colours.NORMAL} ".encode() + \
+                     f"{colours.BOLD} separated by spaces{colours.NORMAL}".encode()
+            socket.send(toSend)
+
+
         return True
 
     def onDisconnect(self, socket):
+        # self.users.pop(list(self.users.keys())[list(self.users.values()).index(socket)])
         self.userCount -= 1
         print(f"disconnecting user. Current number of users: {self.userCount}")
 
