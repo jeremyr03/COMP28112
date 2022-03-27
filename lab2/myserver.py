@@ -1,4 +1,6 @@
 import sys
+import time
+
 from ex2utils import Server
 
 
@@ -31,9 +33,6 @@ class MyServer(Server):
         self.userCount += 1
         print(f"user connected, Current number of users: {self.userCount}")
 
-    def signedIn(self):
-        return
-
     def onMessage(self, socket, message):
         (command, sep, parameter) = message.strip().partition(' ')
         print(f"command: {colours.GREEN}{command}{colours.NORMAL}")
@@ -47,6 +46,11 @@ class MyServer(Server):
                      f"{colours.GREEN}DM <user> <message>{colours.NORMAL} - sends a message to a specific user\n\n" \
                      f"{colours.WARNING}Note: A username is required to send messages{colours.NORMAL}\n\n"
             socket.send(toSend.encode())
+
+        elif command.upper() == "CLOSE":
+            toSend = "Goodbye"
+            socket.send(toSend.encode())
+            self.onDisconnect(socket)
 
         elif parameter == '':
             toSend = "Invalid command. Try again and ensure it is in the format".encode() + \
@@ -123,7 +127,6 @@ class MyServer(Server):
                      f" {colours.WARNING}<COMMAND> <PARAMETER[S]>{colours.NORMAL} ".encode() + \
                      f"{colours.BOLD} separated by spaces{colours.NORMAL}".encode()
             socket.send(toSend)
-
 
         return True
 
