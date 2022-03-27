@@ -39,7 +39,16 @@ class MyServer(Server):
         print(f"command: {colours.GREEN}{command}{colours.NORMAL}")
         print(f"Message: {colours.BLUE}{parameter}{colours.NORMAL}")
 
-        if parameter == '':
+        if command.upper() == "HELP" and parameter == '':
+            toSend = "\n Welcome to Jeremy's server. \n\nCommands:\n" \
+                     f"{colours.GREEN}SET_NAME <username>{colours.NORMAL} - sets a username for user " \
+                     f"{colours.WARNING}(N.B. Username must not contain spaces){colours.NORMAL}\n" \
+                     f"{colours.GREEN}MESSAGE <message>{colours.NORMAL} - sends a message to all users\n" \
+                     f"{colours.GREEN}DM <user> <message>{colours.NORMAL} - sends a message to a specific user\n\n" \
+                     f"{colours.WARNING}Note: A username is required to send messages{colours.NORMAL}\n\n"
+            socket.send(toSend.encode())
+
+        elif parameter == '':
             toSend = "Invalid command. Try again and ensure it is in the format".encode() + \
                      f" {colours.WARNING}<COMMAND> <PARAMETER[S]>{colours.NORMAL} ".encode() + \
                      f"{colours.BOLD} separated by spaces{colours.NORMAL}".encode()
@@ -73,9 +82,14 @@ class MyServer(Server):
                     for key, val in self.users.items():
                         if val != socket:
                             toSend = f"Message from " \
-                                     f"{colours.BLUE}{list(self.users.keys())[list(self.users.values()).index(socket)]}" \
+                                     f"{colours.BLUE}" \
+                                     f"{list(self.users.keys())[list(self.users.values()).index(socket)]}" \
                                      f"{colours.NORMAL}: {colours.GREEN}{parameter}{colours.NORMAL}"
-                            val.send(toSend.encode())
+
+                        else:
+                            toSend = f"You sent:{colours.GREEN}{parameter}{colours.NORMAL}"
+                        val.send(toSend.encode())
+
                 else:
                     toSend = f"{colours.WARNING}There are no other users to send your message to.{colours.NORMAL}"
                     socket.send(toSend.encode())
@@ -89,16 +103,19 @@ class MyServer(Server):
 
                 if DM in self.users.keys():
                     receiver = self.users[DM]
-                    toSend = f"Message from " \
-                             f"{colours.BLUE}{list(self.users.keys())[list(self.users.values()).index(socket)]}" \
-                             f"{colours.NORMAL}: {colours.GREEN}{parameter}{colours.NORMAL}"
-                    receiver.send(toSend.encode())
+                    if receiver != list(self.users.keys())[list(self.users.values()).index(socket)]:
+                        toSend2 = f"Message from " \
+                                 f"{colours.BLUE}{list(self.users.keys())[list(self.users.values()).index(socket)]}" \
+                                 f"{colours.NORMAL}: {colours.GREEN}{parameter}{colours.NORMAL}"
+                        toSend = f"You sent:{colours.GREEN}{parameter}{colours.NORMAL}"
+                        receiver.send(toSend2.encode())
+                    else:
+                        toSend = f"{colours.WARNING}You can't DM yourself!!!{colours.NORMAL}"
                 else:
                     toSend = f"{colours.WARNING}User could not be found.{colours.NORMAL}"
-                    socket.send(toSend.encode())
             else:
                 toSend = f"{colours.WARNING}Assign yourself a username to be able to send a message.{colours.NORMAL}"
-                socket.send(toSend.encode())
+            socket.send(toSend.encode())
 
         else:
             print("Unkown command")
