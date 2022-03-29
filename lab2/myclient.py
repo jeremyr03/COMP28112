@@ -1,4 +1,3 @@
-import random
 import sys
 import tkinter
 from tkinter import ttk, scrolledtext, messagebox
@@ -6,7 +5,6 @@ from tkinter import ttk, scrolledtext, messagebox
 from ex2utils import Client
 from tkinter import *
 
-import time
 
 class IRCClient(Client):
 
@@ -25,11 +23,9 @@ class IRCClient(Client):
 
     def onDisconnect(self, socket):
         print("d")
-        # sys.exit()
 
     def onStop(self):
         print("S")
-        # sys.exit()
 
 
 class GUI:
@@ -105,15 +101,3 @@ class GUI:
 client = None
 g = GUI()
 g.setUp()
-# client = IRCClient()
-
-# # send message to the server
-# username = random.randrange(0, 100)
-# message = f"SET_NAME {username}"
-# message1 = "MESSAGE Hello World"
-# client.send(message.encode())
-# time.sleep(10)
-# client.send(message1.encode())
-#
-# # stops client
-# client.stop()
