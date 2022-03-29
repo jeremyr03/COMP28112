@@ -28,6 +28,7 @@ class MyServer(Server):
 
         if command == '' and parameter == '':
             pass
+
         elif command.upper() == "HELP" and parameter == '':
             toSend = "\n Messaging System for Health-care Professionals \nCommands:\n" \
                      "SET_NAME <username> - sets a username for user " \
