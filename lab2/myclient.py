@@ -21,11 +21,11 @@ class IRCClient(Client):
         g.chatBox.configure(state='disabled')
         return True
 
-    def onDisconnect(self, socket):
-        print("d")
-
-    def onStop(self):
-        print("S")
+    # def onDisconnect(self, socket):
+    #     pass
+    #
+    # def onStop(self):
+    #     pass
 
 
 class GUI:
@@ -66,7 +66,7 @@ class GUI:
         self.chatBox.configure(state="normal")
         self.chatBox.insert(tkinter.INSERT, "Messaging System for Healthcare Professionals\n\n")
         self.chatBox.configure(state="disabled")
-        self.text = Text(self.root, height=1, width=1)
+        self.text = Text(self.root, height=2, width=1)
         self.text.grid(column=1, row=2, columnspan=4, sticky=N + S + E + W)
         self.sendMessage = Button(self.root, text="Send", command=self.send)
         self.sendMessage.grid(column=5, row=2, sticky=N + S + E + W)
