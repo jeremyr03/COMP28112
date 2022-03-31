@@ -16,16 +16,17 @@ class IRCClient(Client):
         # *** process incoming messages here ***
         print(message)
         message += '\n\n'
-        g.chatBox.configure(state='normal')
-        g.chatBox.insert(tkinter.INSERT, message)
-        g.chatBox.configure(state='disabled')
+        g.chatBox["state"] = NORMAL
+        g.chatBox.insert(END, message)
+        g.chatBox["state"] = DISABLED
         return True
 
-    # def onDisconnect(self, socket):
-    #     pass
-    #
-    # def onStop(self):
-    #     pass
+
+def goodbye():
+    global g, client
+    tkinter.messagebox.showinfo("Closing", "Goodbye. Thank you for using this service")
+    g.root.destroy()
+    client.stop()
 
 
 class GUI:
@@ -63,39 +64,33 @@ class GUI:
     def setUp(self):
         self.chatBox = scrolledtext.ScrolledText(self.root, height=30, width=90)
         self.chatBox.grid(column=1, columnspan=5, row=1, padx=10, pady=10, sticky=N + S + E + W)
-        self.chatBox.configure(state="normal")
-        self.chatBox.insert(tkinter.INSERT, "Messaging System for Healthcare Professionals\n\n")
-        self.chatBox.configure(state="disabled")
+        self.chatBox["state"] = NORMAL
+        self.chatBox.insert(END, "Messaging System for Healthcare Professionals\n\n")
+        self.chatBox["state"] = DISABLED
         self.text = Text(self.root, height=2, width=1)
         self.text.grid(column=1, row=2, columnspan=4, sticky=N + S + E + W)
         self.sendMessage = Button(self.root, text="Send", command=self.send)
         self.sendMessage.grid(column=5, row=2, sticky=N + S + E + W)
         self.root.bind("<Return>", self.send)
-        self.root.protocol("WM_DELETE_WINDOW", self.goodbye)
+        self.root.protocol("WM_DELETE_WINDOW", goodbye)
         self.root.mainloop()
 
     def send(self, e=None):
         print("works")
         global client
-        inp = self.text.get("1.0", "end-1c")
+        inp = self.text.get("1.0", tkinter.END + "-1c")
 
         print(inp)
-        self.chatBox.configure(state='normal')
+        # self.chatBox.configure(state='normal')
         if inp.upper().strip() == "CLOSE":
-            self.goodbye()
+            goodbye()
         else:
             client.send(inp.encode())
             inp += '\n'
-            self.chatBox.configure(state='normal')
-            self.chatBox.insert(tkinter.INSERT, inp)
-            self.chatBox.configure(state='disabled')
+            self.chatBox["state"] = NORMAL
+            self.chatBox.insert(END, inp)
+            self.chatBox["state"] = DISABLED
             self.text.delete('1.0', END)
-
-    def goodbye(self):
-        global client
-        tkinter.messagebox.showinfo("Closing", "Goodbye. Thank you for using this service")
-        client.stop()
-        self.root.destroy()
 
 
 client = None
