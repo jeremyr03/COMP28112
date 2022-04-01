@@ -29,9 +29,27 @@ class MyServer(Server):
         if command == '' and parameter == '':
             pass
 
+        elif command.upper() == "LIST" and parameter == '':
+            if socket in self.users.values():
+                if len(self.users.items()) <= 1:
+                    toSend = "you are the only user"
+                else:
+                    toSend = 'Current users in system:\n'
+                    for key, val in self.users.items():
+                        if val == socket:
+                            toSend += "you\n"
+                        else:
+                            toSend += f'{key}\n'
+
+                socket.send(toSend.encode())
+            else:
+                toSend = "Assign yourself a username to be able to see a list of users."
+                socket.send(toSend.encode())
+
         elif command.upper() == "HELP" and parameter == '':
             toSend = "\n Messaging System for Health-care Professionals \nCommands:\n" \
                      "SET_NAME <username> - sets a username for user " \
+                     "LIST - shows a list of connected users" \
                      "(N.B. Username must not contain spaces)\n" \
                      "MESSAGE <message> - sends a message to all users\n" \
                      "DM <user> <message> - sends a message to a specific user\n" \
@@ -43,6 +61,8 @@ class MyServer(Server):
         elif command.upper() == "CLOSE" and parameter == '':
             toSend = "Thank you for using this service"
             socket.send(toSend.encode())
+            socket.close()
+            # connection is closed on the user's side
 
         elif parameter == '':
             toSend = "Invalid command. Try again and ensure it is in the format".encode() + \
@@ -122,9 +142,14 @@ class MyServer(Server):
 
     def onDisconnect(self, socket):
         if socket in self.users.values():
-            self.users.pop(list(self.users.keys())[list(self.users.values()).index(socket)])
+            print(
+                f"disconnecting {list(self.users.keys())[list(self.users.values()).index(socket)]}."
+                f" Current number of users: {self.userCount-1}")
+            self.users.pop(
+                list(self.users.keys())[list(self.users.values()).index(socket)])
+        else:
+            print(f"disconnecting user. Current number of users: {self.userCount-1}")
         self.userCount -= 1
-        print(f"disconnecting user. Current number of users: {self.userCount}")
 
 
 # Parse the IP address and port you wish to listen on.

@@ -10,6 +10,7 @@ class IRCClient(Client):
 
     def __init__(self):
         super(IRCClient, self).__init__()
+        self.done = False
 
     def onMessage(self, socket, message):
         global g
@@ -20,6 +21,18 @@ class IRCClient(Client):
         g.chatBox.insert(END, message)
         g.chatBox["state"] = DISABLED
         return True
+
+    def onDisconnect(self, socket):
+        global g
+        print("disconnected from server")
+
+
+        # try:
+        #     g.chatBox["state"] = NORMAL
+        #     g.chatBox.insert(END, "Server is disconnected\n")
+        #     g.chatBox["state"] = DISABLED
+        # except:
+        #     sys.exit()
 
 
 def goodbye():
@@ -65,7 +78,8 @@ class GUI:
         self.chatBox = scrolledtext.ScrolledText(self.root, height=30, width=90)
         self.chatBox.grid(column=1, columnspan=5, row=1, padx=10, pady=10, sticky=N + S + E + W)
         self.chatBox["state"] = NORMAL
-        self.chatBox.insert(END, "Messaging System for Healthcare Professionals\n\n")
+        self.chatBox.insert(END, "Messaging System for Healthcare Professionals\n"
+                                 "Type \"HELP\" to see the list of commands\n\n")
         self.chatBox["state"] = DISABLED
         self.text = Text(self.root, height=2, width=1)
         self.text.grid(column=1, row=2, columnspan=4, sticky=N + S + E + W)
